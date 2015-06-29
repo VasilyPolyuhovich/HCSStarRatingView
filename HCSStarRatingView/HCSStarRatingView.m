@@ -20,7 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
+#define HCSSTARRATINGVIEW_HIGHLIGHTED_COLOR [UIColor colorWithRed:28.0f / 255.0f green:128.0f / 255.0f blue:160.0f / 255.0f alpha:1.0f]
+
 #import "HCSStarRatingView.h"
+
+@interface HCSStarRatingView ()
+
+@property (nonatomic) BOOL needHighLight;
+
+@end
 
 @implementation HCSStarRatingView {
     NSUInteger _minimumValue;
@@ -113,6 +122,7 @@
 
 - (void)_drawStarWithFrame:(CGRect)frame tintColor:(UIColor*)tintColor highlighted:(BOOL)highlighted {
     UIBezierPath* starShapePath = UIBezierPath.bezierPath;
+    
     [starShapePath moveToPoint: CGPointMake(CGRectGetMinX(frame) + 0.62723 * CGRectGetWidth(frame), CGRectGetMinY(frame) + 0.37309 * CGRectGetHeight(frame))];
     [starShapePath addLineToPoint: CGPointMake(CGRectGetMinX(frame) + 0.50000 * CGRectGetWidth(frame), CGRectGetMinY(frame) + 0.02500 * CGRectGetHeight(frame))];
     [starShapePath addLineToPoint: CGPointMake(CGRectGetMinX(frame) + 0.37292 * CGRectGetWidth(frame), CGRectGetMinY(frame) + 0.37309 * CGRectGetHeight(frame))];
@@ -176,7 +186,9 @@
             [self _drawStarWithFrame:frame tintColor:self.tintColor highlighted:NO];
             [self _drawHalfStarWithFrame:frame tintcolor:self.tintColor highlighted:highlighted];
         } else {
-            [self _drawStarWithFrame:frame tintColor:self.tintColor highlighted:highlighted];
+            UIColor *fillColor = self.needHighLight ? HCSSTARRATINGVIEW_HIGHLIGHTED_COLOR : self.tintColor;
+            
+            [self _drawStarWithFrame:frame tintColor:fillColor highlighted:highlighted];
         }
     }
 }
@@ -189,6 +201,7 @@
 #pragma mark - Touches
 
 - (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
+    self.needHighLight = YES;
     [super beginTrackingWithTouch:touch withEvent:event];
     if (![self isFirstResponder]) {
         [self becomeFirstResponder];
@@ -205,6 +218,7 @@
 }
 
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
+    self.needHighLight = NO;
     [super endTrackingWithTouch:touch withEvent:event];
     if ([self isFirstResponder]) {
         [self resignFirstResponder];
@@ -216,6 +230,7 @@
 }
 
 - (void)cancelTrackingWithEvent:(UIEvent *)event {
+    self.needHighLight = NO;
     [super cancelTrackingWithEvent:event];
     if ([self isFirstResponder]) {
         [self resignFirstResponder];
@@ -230,6 +245,7 @@
     CGFloat cellWidth = self.bounds.size.width / _maximumValue;
     CGPoint location = [touch locationInView:self];
     CGFloat value = location.x / cellWidth;
+    
     if (_allowsHalfStars && value+.5f < ceilf(value)) {
         _value = floor(value)+.5f;
     } else {
