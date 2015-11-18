@@ -28,6 +28,7 @@
 @interface HCSStarRatingView ()
 
 @property (nonatomic) BOOL needHighLight;
+@property (readwrite) NSMutableArray<NSNumber*> *centers;
 
 @end
 
@@ -70,6 +71,11 @@
 }
 
 #pragma mark - Properties
+- (NSMutableArray *)centers{
+    if(!_centers)
+        _centers = [[NSMutableArray alloc] initWithCapacity:_maximumValue];
+    return _centers;
+}
 
 - (NSUInteger)minimumValue {
     return MAX(_minimumValue, 0);
@@ -182,6 +188,8 @@
         CGRect frame = CGRectMake(center.x - starSide/2, center.y - starSide/2, starSide, starSide);
         BOOL highlighted = (idx+1 <= ceilf(_value));
         BOOL halfStar = highlighted ? (idx+1 > _value) : NO;
+        
+        self.centers[idx] = [NSNumber numberWithDouble:center.x];
         if (halfStar && _allowsHalfStars) {
             [self _drawStarWithFrame:frame tintColor:self.tintColor highlighted:NO];
             [self _drawHalfStarWithFrame:frame tintcolor:self.tintColor highlighted:highlighted];
